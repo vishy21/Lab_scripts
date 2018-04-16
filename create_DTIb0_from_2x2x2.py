@@ -20,8 +20,13 @@ if os.path.exists("DTI.b0"):
 else:
 	os.mkdir("DTI.b0")
 	pt_path = os.getcwd()
-	dti_path = "DTI.2X2X2"
-	os.chdir("%s/%s" %(pt_path,dti_path) )
+	dti_path1 = "DTI.2X2X2"
+	dti_path2 = "DTI.2x2x2"
+
+	try:
+		os.chdir("%s/%s" %(pt_path,dti_path1) )
+	except:
+		os.chdir("%s/%s" %(pt_path,dti_path2) )
 
 	lst = os.listdir(os.getcwd())
 
