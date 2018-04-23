@@ -33,19 +33,21 @@ else:
 		print "no DTI directory found"
 	
 	os.chdir("%s/%s" %(pt_path,dti_path) )
-
+	
 	lst = os.listdir(os.getcwd())
 
 	# if  there are no .nii files but there are .dcm files:
 	if len([q for q in lst if q.endswith(".nii")]) == 0 and len([p for p in lst if p.endswith(".dcm")]) > 0:
 		# convert dcm to nii first
 		dcm2nii = "dcm2nii -a n -d n -e n -g n -i n -p n -f y -v n"
-		cmd = "%s %s/%s" %(dcm2nii, pt_path, dti_path)
-
+		cmd = "%s %s/%s/" %(dcm2nii, pt_path, dti_path)
+		
 		try:
 			proc = subprocess.Popen( cmd, shell = True,
 			                         stdout=subprocess.PIPE,
 			                         stderr=subprocess.PIPE )
+			(output, error) = proc.communicate()
+			lst = os.listdir(os.getcwd())
 		except:
 			print "dcm2nii error"
 
