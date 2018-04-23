@@ -21,15 +21,18 @@ if os.path.exists("DTI.b0"):
 else:
 	os.mkdir("DTI.b0")
 	pt_path = os.getcwd()
+	dir_contents = os.listdir(pt_path)
 	dti_path1 = "DTI.2X2X2"
 	dti_path2 = "DTI.2x2x2"
 
-	try:
-		os.chdir("%s/%s" %(pt_path,dti_path1) )
+	if dti_path1 in dir_contents:
 		dti_path = dti_path1
-	except:
-		os.chdir("%s/%s" %(pt_path,dti_path2) )
+	elif dti_path2 in dir_contents:
 		dti_path = dti_path2
+	else:
+		print "no DTI directory found"
+	
+	os.chdir("%s/%s" %(pt_path,dti_path) )
 
 	lst = os.listdir(os.getcwd())
 
