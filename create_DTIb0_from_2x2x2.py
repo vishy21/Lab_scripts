@@ -25,8 +25,10 @@ else:
 
 	try:
 		os.chdir("%s/%s" %(pt_path,dti_path1) )
+		dti_path = dti_path1
 	except:
 		os.chdir("%s/%s" %(pt_path,dti_path2) )
+		dti_path = dti_path2
 
 	lst = os.listdir(os.getcwd())
 
