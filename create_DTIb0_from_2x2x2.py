@@ -2,6 +2,7 @@
 import os
 import dipy
 import nibabel as nib
+import subprocess
 
 from dipy.io import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
