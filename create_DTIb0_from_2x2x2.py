@@ -27,8 +27,10 @@ else:
 
 	if dti_path1 in dir_contents:
 		dti_path = dti_path1
+		print "DTI.2x2x2 found"
 	elif dti_path2 in dir_contents:
 		dti_path = dti_path2
+		print "DTI.2x2x2 found"
 	else:
 		print "no DTI directory found"
 	
@@ -39,6 +41,7 @@ else:
 	# if  there are no .nii files but there are .dcm files:
 	if len([q for q in lst if q.endswith(".nii")]) == 0 and len([p for p in lst if p.endswith(".dcm")]) > 0:
 		# convert dcm to nii first
+		print "converting dcm to nii"
 		dcm2nii = "dcm2nii -a n -d n -e n -g n -i n -p n -f y -v n"
 		cmd = "%s %s/%s/" %(dcm2nii, pt_path, dti_path)
 		
@@ -69,7 +72,7 @@ else:
 		B0 = data[:, :, :, gtab.b0s_mask]
 
 		os.chdir("%s/DTI.b0" %pt_path)
-
+		print "saving DTI.b0"
 		nib.save(nib.Nifti1Image(B0, img.affine), 'b0_from_2x2x2.nii')
 
 
