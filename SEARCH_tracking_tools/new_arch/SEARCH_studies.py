@@ -29,6 +29,15 @@ class SEARCH_study(object):
 		self.DTIb0 = []
 		self.fMRI = []
 		self.MRS_ss = []
+		self.MRS = []
+
+
+		self.PatientName
+		self.PatientAge
+		self.PatientSex
+		self.Scanner
+		self.AcqDate
+		self.Sequence
 
 	def parse_filename(self,pidn_buffer=0):
 		self.parser = [x for x in self.input_file[4:].split("_") if x]

@@ -2,6 +2,7 @@ import SEARCH_studies as study
 import logging
 import os
 from zipfile import ZipFile
+import pydicom
 
 def do_import(directory):
 	## Runs through import steps for each file in directory that is compressed ##
@@ -60,37 +61,71 @@ def import_initialize(filename):
 	else:
 		logging.warning("File is not compressed - skipping...")
 
-def do_unzip(self):
+def do_unzip(study):
 	pass
 	try:
-		if self.mri_loc:
+		if study.mri_loc:
 			pass
 
 	except:
 		logging.error("Missing information.")
 	# check if we have the needed information:
-	if self.mri_loc and self.study and self.pidn and self.visit:
+	if study.mri_loc and study.study and study.pidn and study.visit:
 		pass
-		if self.input_file.endswith(".zip"):
-			self.extract_dir = self.input_file[:-4]
-			os.makedirs(self.extract_dir)
-			logging.info("Creating unzip directory at %s" % self.extract_dir)
-			unzipper = ZipFile(self.input_file, "r")
-			unzipper.extractall(self.extract_dir)
+		if study.input_file.endswith(".zip"):
+			study.extract_dir = study.input_file[:-4]
+			os.makedirs(study.extract_dir)
+			logging.info("Creating unzip directory at %s" % study.extract_dir)
+			unzipper = ZipFile(study.input_file, "r")
+			unzipper.extractall(study.extract_dir)
 			unzipper.close()
 			logging.info("Extraction complete.")
 
-		elif self.input_file.endswith(".rar"):
+		elif study.input_file.endswith(".rar"):
 			logging.error("RAR uncompressing not yet implemented.")
 
-		# self.filename is input zip file
+		# study.filename is input zip file
 
 	else:
 		logging.error("Missing information. Skipping processing")
 
-def find_images(self):
+def find_images(study):
 	pass
+	for root,dirs,files in os.walk(study.extract_dir):
+		if files and re.search("DICOM",root,re.IGNORECASE):
+			dicoms = []
+			not_dicoms = []
+			for dcm in files:
+				try:
+					# try to read dicoms
+					read_dicom_header(root,dcm,study)
+					###
+				except:
+					# if not dicom, read fails
+					pass
 
-def read_dicom_header(self):
+
+
+		for mrs_ in files:
+			if mrs_.endswith(".spar") or mrs_.endswith(".sdat"):
+				mrs_loc = os.path.join(root, mrs_)
+				self.MRS += [mrs_loc]
+
+
+	# Print out what scan sequences we have located. Should have at least 1 of each, with 2 MRS screenshots
+	logging.info("%s T1, %s FLAIR, %s TSE, %s DTI.2x2x2, %s DTI.b0, %s fMRI, %s MRS screenshots found" % (
+		len(study.T1), len(study.FLAIR), len(study.TSE), len(study.DTI2), len(study.DTIb0), len(study.fMRI), len(study.MRS_ss), ))
+	logging.info("%s MRS files found" % len(study.MRS))
+
+	# If we find the screenshots but not the actual MRS files, print out message:
+	if len(study.MRS) == 0 and len(study.MRS_ss) > 0:
+		logging.warning("WARNING! MRS screenshots are found but no MRS files!")
+	# read through study.extract_dir to find where dicoms and MRS are
+
+def read_dicom_header(root,dcm,study):
 	pass
+	ds = pydicom.dcmread(os.path.join(root,dcm))
+	print ds.PatientName
+
+
 
