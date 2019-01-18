@@ -1,8 +1,9 @@
-import SEARCH_studies as study
+import SEARCH_studies as study_
 import logging
 import os
 from zipfile import ZipFile
 import pydicom
+import re
 
 def do_import(directory):
 	## Runs through import steps for each file in directory that is compressed ##
@@ -27,7 +28,7 @@ def do_import(directory):
 				study_class_batch += [study_class]
 				do_unzip(study_class)
 				find_images(study_class)
-				read_dicom_header(study_class)
+				# after finding all images, we should then check if the pt info is matching for all scans
 
 				# unzip the file
 				# find the dicoms
@@ -48,9 +49,9 @@ def import_initialize(filename):
 	logging.info("\n"+"-"*50 + "\n%s\n" % (filename) + "-"*50 )
 	if filename.endswith(".zip") or filename.endswith(".rar"):
 		known = False
-		for known_code in study.known_codes.keys():
+		for known_code in study_.known_codes.keys():
 			if filename.startswith(known_code):
-				created_class = study.known_codes[known_code](filename)
+				created_class = study_.known_codes[known_code](filename)
 				logging.info("STUDY:\t{0.study}\nPIDN:\t{0.pidn}\nVISIT:\t{0.visit}".format(created_class))
 				return created_class
 				known = True
@@ -74,12 +75,15 @@ def do_unzip(study):
 		pass
 		if study.input_file.endswith(".zip"):
 			study.extract_dir = study.input_file[:-4]
-			os.makedirs(study.extract_dir)
-			logging.info("Creating unzip directory at %s" % study.extract_dir)
-			unzipper = ZipFile(study.input_file, "r")
-			unzipper.extractall(study.extract_dir)
-			unzipper.close()
-			logging.info("Extraction complete.")
+			if os.path.isdir(study.extract_dir) == False:
+				os.makedirs(study.extract_dir)
+				logging.info("Creating unzip directory at %s" % study.extract_dir)
+				unzipper = ZipFile(study.input_file, "r")
+				unzipper.extractall(study.extract_dir)
+				unzipper.close()
+				logging.info("Extraction complete.")
+			else:
+				logging.error("%s already exists!" % study.extract_dir)
 
 		elif study.input_file.endswith(".rar"):
 			logging.error("RAR uncompressing not yet implemented.")
@@ -125,7 +129,57 @@ def find_images(study):
 def read_dicom_header(root,dcm,study):
 	pass
 	ds = pydicom.dcmread(os.path.join(root,dcm))
-	print ds.PatientName
+	# get header data
+	if "PixelData" in ds:
+		header_info = {}
+		try:
+			header_info["Name"] = ds.PatientName
+		except:
+			pass
+		try:
+			header_info["Sex"] = ds.PatientSex
+		except:
+			pass
+		try:
+			header_info["Age"] = ds.PatientAge
+		except:
+			pass
+		try:
+			header_info["Date"] = ds.StudyDate
+		except:
+			pass
+		try:
+			header_info["Scanner"] = ds.ManufacturerModelName
+		except:
+			pass
+		try:
+			header_info["Sequence"] = ds.SeriesDescription
+		except:
+			pass
+	# if pixeldata and known scanner, then read and prep for import
+		if header_info["Sequence"] == study_.T1_seq:
+			header_info["path"] == os.path.join(root,dcm)
+			study.T1 += [header_info]
+		elif header_info["Sequence"] == study_.FLAIR_seq:
+			header_info["path"] == os.path.join(root,dcm)
+			study.FLAIR += [header_info]
+		elif header_info["Sequence"] == study_.TSE_seq:
+			header_info["path"] == os.path.join(root,dcm)
+			study.TSE += [header_info]
+		elif header_info["Sequence"] == study_.DTI2_seq:
+			header_info["path"] == os.path.join(root,dcm)
+			study.DTI2 += [header_info]
+		elif header_info["Sequence"] == study_.DTIb0_seq:
+			header_info["path"] == os.path.join(root,dcm)
+			study.DTIb0 += [header_info]
+		elif header_info["Sequence"] == study_.fMRI_seq:
+			header_info["path"] == os.path.join(root,dcm)
+			study.fMRI += [header_info]
+		elif header_info["Sequence"].startwith("MRS"):
+			header_info["path"] == os.path.join(root,dcm)
+			study.MRS_ss += [header_info]
+		
+
 
 
 
